@@ -1,222 +1,130 @@
-# import streamlit as st
-# from PIL import Image
-# import os
-# import random
-
-# st.set_page_config(page_title="🧬 PapiLab Educativo", layout="centered")
-
-# # =========================
-# # Inicializar variables de sesión
-# # =========================
-# if "area" not in st.session_state:
-#     st.session_state.area = None
-# if "imagen_actual" not in st.session_state:
-#     st.session_state.imagen_actual = None
-# if "intentos" not in st.session_state:
-#     st.session_state.intentos = 0
-# if "correctas_1" not in st.session_state:
-#     st.session_state.correctas_1 = 0
-# if "correctas_2" not in st.session_state:
-#     st.session_state.correctas_2 = 0
-# if "errores" not in st.session_state:
-#     st.session_state.errores = 0
-
-# # =========================
-# # Función para cargar una nueva imagen
-# # =========================
-# def nueva_imagen():
-#     folder = f"huellas/{st.session_state.area.lower()}es"
-#     imagenes = os.listdir(folder)
-#     st.session_state.imagen_actual = random.choice(imagenes)
-#     st.session_state.intentos = 0
-
-# # =========================
-# # Elegir área si aún no se seleccionó
-# # =========================
-# if st.session_state.area is None:
-#     st.title("🧬 PapiLab - Clasificación de Patrones Papilares")
-#     st.write("Bienvenido/a 👋 Elige un área para practicar tus habilidades en identificación de huellas.")
-#     area_seleccionada = st.selectbox("📍 ¿En qué área deseas practicar?", ["Dactilar", "Palmar", "Plantar"])
-#     if st.button("Comenzar ▶️"):
-#         st.session_state.area = area_seleccionada
-#         nueva_imagen()
-#         st.rerun()
-
-# else:
-#     st.title(f"🧬 PapiLab - Área: {st.session_state.area}")
-#     folder = f"huellas/{st.session_state.area.lower()}es"
-    
-#     # Mostrar imagen
-#     st.image(f"{folder}/{st.session_state.imagen_actual}", width=300)
-
-#     # Opciones de patrón
-#     tipo_patron = st.selectbox(
-#         "🔍 ¿Qué patrón papilar identificas?",
-#         ["Seleccionar", "Arco", "Presilla interna", "Presilla externa", "Verticilo"]
-#     )
-
-#     # Subclasificación según patrón
-#     subclasificacion = None
-#     if tipo_patron == "Arco":
-#         subclasificacion = st.selectbox("Subclasificación (Arco)", ["6", "7", "8", "9"])
-#     elif tipo_patron in ["Presilla interna", "Presilla externa", "Verticilo"]:
-#         subclasificacion = st.selectbox(f"Subclasificación ({tipo_patron})", ["S", "D", "M"])
-
-#     # Botón para confirmar respuesta
-#     if st.button("Responder ✅"):
-#         if tipo_patron != "Seleccionar":
-#             st.session_state.intentos += 1
-            
-#             # Simulación de respuesta correcta (luego lo conectamos a una base de datos real)
-#             respuesta_correcta = "Verticilo"
-
-#             if tipo_patron == respuesta_correcta:
-#                 if st.session_state.intentos == 1:
-#                     st.session_state.correctas_1 += 1
-#                     st.success("🎯 ¡Perfecto! Lo lograste al primer intento.")
-#                 else:
-#                     st.session_state.correctas_2 += 1
-#                     st.info("👍 ¡Bien! Lo lograste en el segundo intento.")
-#                 nueva_imagen()
-#             else:
-#                 if st.session_state.intentos < 2:
-#                     st.warning("⚠️ No es correcto... inténtalo de nuevo.")
-#                 else:
-#                     st.session_state.errores += 1
-#                     st.error(f"❌ Incorrecto. La respuesta correcta era: **{respuesta_correcta}**. Revisa la bibliografía 📚.")
-#                     nueva_imagen()
-
-#     # Mostrar contadores
-#     st.markdown("---")
-#     st.subheader("📊 Estadísticas de la sesión")
-#     st.write(f"✅ Correctas al primer intento: **{st.session_state.correctas_1}**")
-#     st.write(f"👌 Correctas al segundo intento: **{st.session_state.correctas_2}**")
-#     st.write(f"❌ Errores: **{st.session_state.errores}**")
-
-#     # Botón para terminar
-#     if st.button("Finalizar sesión 🏁"):
-#         st.session_state.area = None
-#         st.session_state.imagen_actual = None
-#         st.session_state.correctas_1 = 0
-#         st.session_state.correctas_2 = 0
-#         st.session_state.errores = 0
-#         st.rerun()
-
 import streamlit as st
-from PIL import Image
 import os
-import random
-
-st.set_page_config(page_title="🧬 PapiLab Educativo", layout="centered")
 
 # =========================
-# Opciones de clasificación
+# Función para mostrar imagen
 # =========================
-opciones_del_sistema = {
-    "Palmar": {
-        "Palmer Pond": ["Tipo 1", "Tipo 2", "Tipo 3"],
-        "Stockis": ["Grupo A", "Grupo B", "Grupo C"],
-        "Alvariza": ["Clase X", "Clase Y", "Clase Z"]
-    },
-    "Plantar": {
-        "Preller": ["Tipo A", "Tipo B", "Tipo C"],
-        "WW": ["Clase I", "Clase II", "Clase III"],
-        "Jerlow": ["Forma 1", "Forma 2", "Forma 3"],
-        "Urquijo": ["Variante α", "Variante β", "Variante γ"]
-    }
-}
+def mostrar_imagen(area, sistema=None):
+    ruta = None
 
-# =========================
-# Inicializar variables de sesión
-# =========================
-for key, value in {
-    "area": None, "imagen_actual": None, "intentos": 0,
-    "correctas_1": 0, "correctas_2": 0, "errores": 0
-}.items():
-    if key not in st.session_state:
-        st.session_state[key] = value
+    if area == "Dactilar":
+        ruta = os.path.join("huellas", "dactilares", "huella1.png")
+
+    elif area == "Palmar" and sistema:
+        ruta = os.path.join("huellas", "palmares", "huella1.png")
+
+    elif area == "Plantar" and sistema:
+        ruta = os.path.join("huellas", "plantares", "huella1.png")
+
+    if ruta and os.path.exists(ruta):
+        st.image(ruta, use_container_width=True)
+    else:
+        st.info("📷 Aún no hay imagen cargada para esta opción.")
+
 
 # =========================
-# Función para cargar una nueva imagen
+# Interfaz principal
 # =========================
-def nueva_imagen():
-    folder = f"huellas/{st.session_state.area.lower()}es"
-    imagenes = os.listdir(folder)
-    st.session_state.imagen_actual = random.choice(imagenes)
-    st.session_state.intentos = 0
+st.header("🔍 Clasificación de huellas papilares")
+
+area = st.selectbox("Selecciona el área a clasificar:", ["Seleccionar", "Dactilar", "Palmar", "Plantar"])
 
 # =========================
-# Elegir área
+# Área Dactilar
 # =========================
-if st.session_state.area is None:
-    st.title("🧬 PapiLab - Clasificación de Patrones Papilares")
-    st.write("Bienvenido/a 👋 Elige un área para practicar tus habilidades en identificación de huellas.")
-    area_seleccionada = st.selectbox("📍 ¿En qué área deseas practicar?", ["Dactilar", "Palmar", "Plantar"])
-    if st.button("Comenzar ▶️"):
-        st.session_state.area = area_seleccionada
-        nueva_imagen()
-        st.rerun()
+if area == "Dactilar":
+    mostrar_imagen("Dactilar")
 
-else:
-    st.title(f"🧬 PapiLab - Área: {st.session_state.area}")
-    folder = f"huellas/{st.session_state.area.lower()}es"
-    st.image(f"{folder}/{st.session_state.imagen_actual}", width=300)
+    tipo_patron = st.selectbox("¿Qué patrón papilar identificas?",
+                               ["Seleccionar", "Arco", "Presilla interna", "Presilla externa", "Verticilo"])
+    
+    if tipo_patron == "Arco":
+        subclasificacion = st.selectbox("Subclasificación (Arco)", ["6", "7", "8", "9"])
+    elif tipo_patron in ["Presilla interna", "Presilla externa", "Verticilo"]:
+        subclasificacion = st.selectbox("Subclasificación", ["S", "D", "M"])
+    else:
+        subclasificacion = None
 
-    respuesta_usuario = None  # Variable para guardar la respuesta
+    if st.button("✅ Enviar respuesta (Dactilar)"):
+        if tipo_patron != "Seleccionar" and subclasificacion:
+            st.success(f"Respuesta registrada: {tipo_patron} - {subclasificacion}")
 
-    if st.session_state.area == "Dactilar":
-        tipo_patron = st.selectbox("🔍 ¿Qué patrón papilar identificas?",
-                                   ["Seleccionar", "Arco", "Presilla interna", "Presilla externa", "Verticilo"])
-        if tipo_patron == "Arco":
-            subclasificacion = st.selectbox("Subclasificación (Arco)", ["6", "7", "8", "9"])
-        elif tipo_patron in ["Presilla interna", "Presilla externa", "Verticilo"]:
-            subclasificacion = st.selectbox("Subclasificación", ["S", "D", "M"])
-        respuesta_usuario = tipo_patron
+# =========================
+# Área Palmar
+# =========================
+elif area == "Palmar":
+    sistema_palmar = st.selectbox("Selecciona el sistema Palmar:", ["Seleccionar", "Stockis", "PalmerPond"])
+    
+    if sistema_palmar != "Seleccionar":
+        mostrar_imagen("Palmar", sistema_palmar)
 
-    elif st.session_state.area == "Palmar":
-        sistema = st.selectbox("📚 Sistema de clasificación", list(opciones_del_sistema["Palmar"].keys()))
-        clasificacion = st.selectbox("Clasificación", opciones_del_sistema["Palmar"][sistema])
-        respuesta_usuario = clasificacion
+        st.write(f"✍️ Ingresa la clasificación según el sistema **{sistema_palmar}**")
 
-    elif st.session_state.area == "Plantar":
-        sistema = st.selectbox("📚 Sistema de clasificación", list(opciones_del_sistema["Plantar"].keys()))
-        clasificacion = st.selectbox("Clasificación", opciones_del_sistema["Plantar"][sistema])
-        respuesta_usuario = clasificacion
+        if sistema_palmar == "Stockis":
+            col1, col2, col3 = st.columns(3)
+            with col1:
+                c1 = st.text_input("Izquierda 1")
+            with col2:
+                c2 = st.text_input("Izquierda 2")
+            with col3:
+                c3 = st.text_input("Izquierda 3")
+            with col1:
+                d1 = st.text_input("Derecha 1")
+            with col2:
+                d2 = st.text_input("Derecha 2")
+            with col3:
+                d3 = st.text_input("Derecha 3")
+            clasificacion = [c1, c2, c3, d1, d2, d3]
 
-    # =========================
-    # Botón para confirmar respuesta
-    # =========================
-    if st.button("Responder ✅"):
-        if respuesta_usuario and respuesta_usuario != "Seleccionar":
-            st.session_state.intentos += 1
-            respuesta_correcta = "Verticilo"  # Placeholder
-            if respuesta_usuario == respuesta_correcta:
-                if st.session_state.intentos == 1:
-                    st.session_state.correctas_1 += 1
-                    st.success("🎯 ¡Perfecto! Lo lograste al primer intento.")
-                else:
-                    st.session_state.correctas_2 += 1
-                    st.info("👍 ¡Bien! Lo lograste en el segundo intento.")
-                nueva_imagen()
-            else:
-                if st.session_state.intentos < 2:
-                    st.warning("⚠️ No es correcto... inténtalo de nuevo.")
-                else:
-                    st.session_state.errores += 1
-                    st.error(f"❌ Incorrecto. La respuesta correcta era: **{respuesta_correcta}**. Revisa la bibliografía 📚.")
-                    nueva_imagen()
+        elif sistema_palmar == "PalmerPond":
+            col1, col2, col3, col4, col5, col6 = st.columns(6)
+            entradas = []
+            for i, col in enumerate([col1, col2, col3, col4, col5, col6], start=1):
+                with col:
+                    entradas.append(st.text_input(f"Pos {i}"))
+            clasificacion = entradas
+        else:
+            clasificacion = []
 
-    # =========================
-    # Estadísticas
-    # =========================
-    st.markdown("---")
-    st.subheader("📊 Estadísticas de la sesión")
-    st.write(f"✅ Correctas al primer intento: **{st.session_state.correctas_1}**")
-    st.write(f"👌 Correctas al segundo intento: **{st.session_state.correctas_2}**")
-    st.write(f"❌ Errores: **{st.session_state.errores}**")
+        if st.button("✅ Enviar respuesta (Palmar)"):
+            st.success(f"Clasificación registrada: {clasificacion}")
 
-    if st.button("Finalizar sesión 🏁"):
-        for key in ["area", "imagen_actual", "correctas_1", "correctas_2", "errores"]:
-            st.session_state[key] = None if key == "area" else 0
-        st.rerun()
+# =========================
+# Área Plantar
+# =========================
+elif area == "Plantar":
+    sistema_plantar = st.selectbox("Selecciona el sistema Plantar:", ["Seleccionar", "Stockis", "OtroSistema"])
+    
+    if sistema_plantar != "Seleccionar":
+        mostrar_imagen("Plantar", sistema_plantar)
 
+        st.write(f"✍️ Ingresa la clasificación según el sistema **{sistema_plantar}**")
+
+        if sistema_plantar == "Stockis":
+            col1, col2, col3 = st.columns(3)
+            with col1:
+                c1 = st.text_input("Izquierda 1")
+            with col2:
+                c2 = st.text_input("Izquierda 2")
+            with col3:
+                c3 = st.text_input("Izquierda 3")
+            with col1:
+                d1 = st.text_input("Derecha 1")
+            with col2:
+                d2 = st.text_input("Derecha 2")
+            with col3:
+                d3 = st.text_input("Derecha 3")
+            clasificacion = [c1, c2, c3, d1, d2, d3]
+
+        elif sistema_plantar == "OtroSistema":
+            col1, col2, col3, col4 = st.columns(4)
+            entradas = []
+            for i, col in enumerate([col1, col2, col3, col4], start=1):
+                with col:
+                    entradas.append(st.text_input(f"Pos {i}"))
+            clasificacion = entradas
+        else:
+            clasificacion = []
+
+        if st.button("✅ Enviar respuesta (Plantar)"):
+            st.success(f"Clasificación registrada: {clasificacion}")
